@@ -13,3 +13,15 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# Terraform files
+*.tfstate
+*.tfstate.*
+*.lock.hcl
+.terraform
+
+# Ignore providers files with sensitive data
+providers.tf
+
+# Dot environment files
+.env
