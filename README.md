@@ -1,4 +1,4 @@
-# nextdns-go
+# terraform-provider-nextdns
 
 [NextDNS](https://nextdns.io/) provider for [Terraform](https://terraform.io).
 
