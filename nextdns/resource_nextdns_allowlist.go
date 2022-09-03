@@ -100,7 +100,7 @@ func resourceNextDNSAllowlistUpdate(ctx context.Context, d *schema.ResourceData,
 		}
 		err := client.Allowlist.Create(ctx, request)
 		if err != nil {
-			return diag.FromErr(errors.Wrap(err, "error creating allow list"))
+			return diag.FromErr(errors.Wrap(err, "error updating allow list"))
 		}
 	}
 

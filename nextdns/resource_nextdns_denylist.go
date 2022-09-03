@@ -100,7 +100,7 @@ func resourceNextDNSDenylistUpdate(ctx context.Context, d *schema.ResourceData, 
 		}
 		err := client.Denylist.Create(ctx, request)
 		if err != nil {
-			return diag.FromErr(errors.Wrap(err, "error creating deny list"))
+			return diag.FromErr(errors.Wrap(err, "error updating deny list"))
 		}
 	}
 
