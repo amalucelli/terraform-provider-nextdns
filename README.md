@@ -12,7 +12,7 @@ You can find your API Key in the [NextDNS account](https://my.nextdns.io/account
 ## Getting Started
 
 **Important**: This provider is not yet published on the Terraform Registry
-and it is still under development. If you want to use it, you will need to build and install it locally.
+and it is still under development. If you want to use it, you will have to build and install it locally.
 
 ```hcl
 terraform {
