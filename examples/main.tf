@@ -50,6 +50,33 @@ resource "nextdns_security" "this" {
   ]
 }
 
+resource "nextdns_privacy" "this" {
+  profile_id = "3c9e29"
+
+  disguised_trackers = true
+  allow_affiliate    = false
+
+  blocklists = [
+    "nextdns-recommended",
+    "easylist",
+    "goodbye-ads",
+    "1hosts-pro",
+    "easyprivacy",
+    "adguard-base-filter",
+  ]
+
+  natives = [
+    "apple",
+    "alexa",
+    "windows",
+    "xiaomi",
+    "huawei",
+    "roku",
+    "sonos",
+    "samsung",
+  ]
+}
+
 terraform {
   required_providers {
     nextdns = {
