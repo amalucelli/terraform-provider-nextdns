@@ -1,5 +1,10 @@
+variable "profile_id" {
+  type    = string
+  default = "abc123"
+}
+
 resource "nextdns_denylist" "this" {
-  profile_id = "3c9e29"
+  profile_id = var.profile_id
 
   domain {
     id     = "google.com"
@@ -13,7 +18,7 @@ resource "nextdns_denylist" "this" {
 }
 
 resource "nextdns_allowlist" "this" {
-  profile_id = "3c9e29"
+  profile_id = var.profile_id
 
   domain {
     id     = "search.brave.com"
@@ -27,7 +32,7 @@ resource "nextdns_allowlist" "this" {
 }
 
 resource "nextdns_security" "this" {
-  profile_id = "3c9e29"
+  profile_id = var.profile_id
 
   threat_intelligence_feeds = true
   ai_threat_detection       = false
@@ -51,7 +56,7 @@ resource "nextdns_security" "this" {
 }
 
 resource "nextdns_privacy" "this" {
-  profile_id = "3c9e29"
+  profile_id = var.profile_id
 
   disguised_trackers = true
   allow_affiliate    = false
