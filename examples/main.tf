@@ -26,6 +26,30 @@ resource "nextdns_allowlist" "this" {
   }
 }
 
+resource "nextdns_security" "this" {
+  profile_id = "3c9e29"
+
+  threat_intelligence_feeds = true
+  ai_threat_detection       = false
+  google_safe_browsing      = true
+  crypto_jacking            = false
+  dns_rebinding             = true
+  idn_homographs            = false
+  typo_squatting            = true
+  dga                       = false
+  nrd                       = true
+  ddns                      = false
+  parking                   = true
+  csam                      = false
+
+  tlds = [
+    "pizza",
+    "beer",
+    "meme",
+    "ninja",
+  ]
+}
+
 terraform {
   required_providers {
     nextdns = {

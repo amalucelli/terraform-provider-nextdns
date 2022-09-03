@@ -20,6 +20,7 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"nextdns_denylist":  resourceNextDNSDenylist(),
 			"nextdns_allowlist": resourceNextDNSAllowlist(),
+			"nextdns_security":  resourceNextDNSSecurity(),
 		},
 		ConfigureContextFunc: configure,
 	}
