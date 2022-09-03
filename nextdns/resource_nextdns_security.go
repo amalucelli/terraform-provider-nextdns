@@ -82,7 +82,7 @@ func resourceNextDNSSecurityUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	sec, err := buildSecurity(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating security settings"))
+		return diag.FromErr(errors.Wrap(err, "error updating security settings"))
 	}
 
 	request := &nextdns.UpdateSecurityRequest{
@@ -91,7 +91,7 @@ func resourceNextDNSSecurityUpdate(ctx context.Context, d *schema.ResourceData, 
 	}
 	err = client.Security.Update(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating security settings"))
+		return diag.FromErr(errors.Wrap(err, "error updating security settings"))
 	}
 
 	return resourceNextDNSSecurityRead(ctx, d, meta)
