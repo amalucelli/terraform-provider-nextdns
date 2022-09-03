@@ -19,6 +19,7 @@
 *.tfstate.*
 *.lock.hcl
 .terraform
+terraform.tfvars
 
 # Ignore providers files with sensitive data
 providers.tf
