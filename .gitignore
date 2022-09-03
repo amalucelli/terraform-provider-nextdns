@@ -19,10 +19,10 @@
 *.tfstate.*
 *.lock.hcl
 .terraform
-terraform.tfvars
 
-# Ignore providers files with sensitive data
+# Ignore providers and variables files with sensitive data
 providers.tf
+terraform.tfvars
 
 # Dot environment files
 .env
