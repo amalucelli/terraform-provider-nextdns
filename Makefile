@@ -1,11 +1,11 @@
 # This is used mostly for development.
-GOOS := "$(shell go env GOOS)"
-GOARCH := "$(shell go env GOARCH)"
+GOOS := $(shell go env GOOS)
+GOARCH := $(shell go env GOARCH)
 VERSION := 0.1.0
 
 # This is used mostly for development as this is how Terraform
 # reads the plugin from the local plugins folder.
-REGISTRY := "github.com"
+REGISTRY := github.com
 ORG := amalucelli
 NAME := nextdns
 
