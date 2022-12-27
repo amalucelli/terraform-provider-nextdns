@@ -4,8 +4,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
-github.com/amalucelli/nextdns-go v0.1.1-0.20220901215104-28d056c741ca h1:oqvDtAQBvgE6UzXHnWmRc8sLeYo5JA9N6UuWMk59VkU=
-github.com/amalucelli/nextdns-go v0.1.1-0.20220901215104-28d056c741ca/go.mod h1:7LcYoz6xw67CVfDjR5g70mpcFTbZzvztH2jiCmCR5iU=
+github.com/amalucelli/nextdns-go v0.2.0 h1:RPzjjZtoyUZrf6SeQIRrH456pYn7oRa8Fi+se8bUU/s=
+github.com/amalucelli/nextdns-go v0.2.0/go.mod h1:7LcYoz6xw67CVfDjR5g70mpcFTbZzvztH2jiCmCR5iU=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/apparentlymart/go-dump v0.0.0-20180507223929-23540a00eaa3/go.mod h1:oL81AME2rN47vu18xqj1S1jPIPuN7afo62yKTNn3XMM=
 github.com/apparentlymart/go-dump v0.0.0-20190214190832-042adf3cf4a0 h1:MzVXffFUye+ZcSR6opIgz9Co7WcDx6ZcY+RjfFHoA0I=

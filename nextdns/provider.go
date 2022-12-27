@@ -18,10 +18,11 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"nextdns_allowlist": resourceNextDNSAllowlist(),
-			"nextdns_denylist":  resourceNextDNSDenylist(),
-			"nextdns_privacy":   resourceNextDNSPrivacy(),
-			"nextdns_security":  resourceNextDNSSecurity(),
+			"nextdns_allowlist":        resourceNextDNSAllowlist(),
+			"nextdns_denylist":         resourceNextDNSDenylist(),
+			"nextdns_privacy":          resourceNextDNSPrivacy(),
+			"nextdns_parental_control": resourceNextDNSParentalControl(),
+			"nextdns_security":         resourceNextDNSSecurity(),
 		},
 		ConfigureContextFunc: configure,
 	}

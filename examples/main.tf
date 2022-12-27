@@ -31,6 +31,39 @@ resource "nextdns_allowlist" "this" {
   }
 }
 
+resource "nextdns_parental_control" "this" {
+  profile_id = var.profile_id
+
+  safe_search             = true
+  youtube_restricted_mode = false
+  block_bypass            = true
+
+  service {
+    id     = "tiktok"
+    active = true
+  }
+
+  service {
+    id     = "instagram"
+    active = false
+  }
+
+  service {
+    id     = "facebook"
+    active = true
+  }
+
+  category {
+    id     = "dating"
+    active = false
+  }
+
+  category {
+    id     = "gambling"
+    active = true
+  }
+}
+
 resource "nextdns_security" "this" {
   profile_id = var.profile_id
 
