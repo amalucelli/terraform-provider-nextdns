@@ -2,8 +2,10 @@ package nextdns
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/amalucelli/nextdns-go/nextdns"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
@@ -28,13 +30,38 @@ func resourceNextDNSParentalControlCreate(ctx context.Context, d *schema.Resourc
 
 	parentalControl, err := buildParentalControl(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error building parental control settings from resource"))
+		return diag.FromErr(errors.Wrap(err, "error creating parental control settings"))
+	}
+	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", parentalControl))
+
+	services := &nextdns.CreateParentalControlServicesRequest{
+		ProfileID:               profileID,
+		ParentalControlServices: parentalControl.Services,
+	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", services))
+
+	err = client.ParentalControlServices.Create(ctx, services)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error creating services settings"))
+	}
+
+	categories := &nextdns.CreateParentalControlCategoriesRequest{
+		ProfileID:                 profileID,
+		ParentalControlCategories: parentalControl.Categories,
+	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", categories))
+
+	err = client.ParentalControlCategories.Create(ctx, categories)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error creating categories settings"))
 	}
 
 	request := &nextdns.UpdateParentalControlRequest{
 		ProfileID:       profileID,
 		ParentalControl: parentalControl,
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
+
 	err = client.ParentalControl.Update(ctx, request)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error creating parental control settings"))
@@ -52,10 +79,13 @@ func resourceNextDNSParentalControlRead(ctx context.Context, d *schema.ResourceD
 	request := &nextdns.GetParentalControlRequest{
 		ProfileID: profileID,
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
+
 	parentalControl, err := client.ParentalControl.Get(ctx, request)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error getting parental control settings"))
 	}
+	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", parentalControl))
 
 	var services []map[string]interface{}
 
@@ -100,11 +130,36 @@ func resourceNextDNSParentalControlUpdate(ctx context.Context, d *schema.Resourc
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error updating parental control settings"))
 	}
+	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", parentalControl))
+
+	services := &nextdns.CreateParentalControlServicesRequest{
+		ProfileID:               profileID,
+		ParentalControlServices: parentalControl.Services,
+	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", services))
+
+	err = client.ParentalControlServices.Create(ctx, services)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error updating services settings"))
+	}
+
+	categories := &nextdns.CreateParentalControlCategoriesRequest{
+		ProfileID:                 profileID,
+		ParentalControlCategories: parentalControl.Categories,
+	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", categories))
+
+	err = client.ParentalControlCategories.Create(ctx, categories)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error updating categories settings"))
+	}
 
 	request := &nextdns.UpdateParentalControlRequest{
 		ProfileID:       profileID,
 		ParentalControl: parentalControl,
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
+
 	err = client.ParentalControl.Update(ctx, request)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error updating parental control settings"))
@@ -121,6 +176,8 @@ func resourceNextDNSParentalControlDelete(ctx context.Context, d *schema.Resourc
 		ProfileID:               profileID,
 		ParentalControlServices: []*nextdns.ParentalControlServices{},
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", services))
+
 	err := client.ParentalControlServices.Create(ctx, services)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error deleting services settings"))
@@ -130,6 +187,8 @@ func resourceNextDNSParentalControlDelete(ctx context.Context, d *schema.Resourc
 		ProfileID:                 profileID,
 		ParentalControlCategories: []*nextdns.ParentalControlCategories{},
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", categories))
+
 	err = client.ParentalControlCategories.Create(ctx, categories)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error deleting categories settings"))
@@ -139,6 +198,8 @@ func resourceNextDNSParentalControlDelete(ctx context.Context, d *schema.Resourc
 		ProfileID:       profileID,
 		ParentalControl: &nextdns.ParentalControl{},
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", parentalControl))
+
 	err = client.ParentalControl.Update(ctx, parentalControl)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error deleting parental control settings"))
@@ -165,37 +226,33 @@ func buildParentalControl(d *schema.ResourceData) (*nextdns.ParentalControl, err
 		YoutubeRestrictedMode: d.Get("youtube_restricted_mode").(bool),
 	}
 
-	foundSvc, ok := d.GetOk("service")
-	if !ok {
-		return nil, errors.New("unable to find service in resource data")
-	}
+	ParentalControl.Services = []*nextdns.ParentalControlServices{}
+	if foundSvc, ok := d.GetOk("service"); ok {
+		recordsSvc := foundSvc.(*schema.Set).List()
+		services := make([]*nextdns.ParentalControlServices, len(recordsSvc))
 
-	recordsSvc := foundSvc.(*schema.Set).List()
-
-	services := make([]*nextdns.ParentalControlServices, len(recordsSvc))
-	for k, v := range recordsSvc {
-		services[k] = &nextdns.ParentalControlServices{
-			ID:     v.(map[string]interface{})["id"].(string),
-			Active: v.(map[string]interface{})["active"].(bool),
+		for k, v := range recordsSvc {
+			services[k] = &nextdns.ParentalControlServices{
+				ID:     v.(map[string]interface{})["id"].(string),
+				Active: v.(map[string]interface{})["active"].(bool),
+			}
 		}
-	}
-	ParentalControl.Services = services
-
-	foundCat, ok := d.GetOk("category")
-	if !ok {
-		return nil, errors.New("unable to find category in resource data")
+		ParentalControl.Services = services
 	}
 
-	recordsCat := foundCat.(*schema.Set).List()
+	ParentalControl.Categories = []*nextdns.ParentalControlCategories{}
+	if foundCat, ok := d.GetOk("category"); ok {
+		recordsCat := foundCat.(*schema.Set).List()
+		categories := make([]*nextdns.ParentalControlCategories, len(recordsCat))
 
-	categories := make([]*nextdns.ParentalControlCategories, len(recordsCat))
-	for k, v := range recordsCat {
-		categories[k] = &nextdns.ParentalControlCategories{
-			ID:     v.(map[string]interface{})["id"].(string),
-			Active: v.(map[string]interface{})["active"].(bool),
+		for k, v := range recordsCat {
+			categories[k] = &nextdns.ParentalControlCategories{
+				ID:     v.(map[string]interface{})["id"].(string),
+				Active: v.(map[string]interface{})["active"].(bool),
+			}
 		}
+		ParentalControl.Categories = categories
 	}
-	ParentalControl.Categories = categories
 
 	return ParentalControl, nil
 }

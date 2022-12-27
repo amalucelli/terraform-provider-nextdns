@@ -2,8 +2,10 @@ package nextdns
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/amalucelli/nextdns-go/nextdns"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
@@ -28,18 +30,42 @@ func resourceNextDNSPrivacyCreate(ctx context.Context, d *schema.ResourceData, m
 
 	privacy, err := buildPrivacy(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error building privacy settings from resource"))
+		return diag.FromErr(errors.Wrap(err, "error creating privacy settings"))
+	}
+	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", privacy))
+
+	blocklist := &nextdns.CreatePrivacyBlocklistsRequest{
+		ProfileID:         profileID,
+		PrivacyBlocklists: privacy.Blocklists,
+	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", blocklist))
+
+	err = client.PrivacyBlocklists.Create(ctx, blocklist)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error creating blocklist settings"))
+	}
+
+	natives := &nextdns.CreatePrivacyNativesRequest{
+		ProfileID:      profileID,
+		PrivacyNatives: privacy.Natives,
+	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", natives))
+
+	err = client.PrivacyNatives.Create(ctx, natives)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error creating native settings"))
 	}
 
 	request := &nextdns.UpdatePrivacyRequest{
 		ProfileID: profileID,
 		Privacy:   privacy,
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
+
 	err = client.Privacy.Update(ctx, request)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error creating privacy settings"))
 	}
-
 	d.SetId(profileID)
 
 	return resourceNextDNSPrivacyRead(ctx, d, meta)
@@ -75,14 +101,39 @@ func resourceNextDNSPrivacyUpdate(ctx context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error updating privacy settings"))
 	}
+	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", privacy))
+
+	blocklist := &nextdns.CreatePrivacyBlocklistsRequest{
+		ProfileID:         profileID,
+		PrivacyBlocklists: privacy.Blocklists,
+	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", blocklist))
+
+	err = client.PrivacyBlocklists.Create(ctx, blocklist)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error deleting blocklist settings"))
+	}
+
+	natives := &nextdns.CreatePrivacyNativesRequest{
+		ProfileID:      profileID,
+		PrivacyNatives: privacy.Natives,
+	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", natives))
+
+	err = client.PrivacyNatives.Create(ctx, natives)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error deleting native settings"))
+	}
 
 	request := &nextdns.UpdatePrivacyRequest{
 		ProfileID: profileID,
 		Privacy:   privacy,
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
+
 	err = client.Privacy.Update(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error updating privacy settings"))
+		return diag.FromErr(errors.Wrap(err, "error deleting privacy settings"))
 	}
 
 	return resourceNextDNSPrivacyRead(ctx, d, meta)
@@ -96,6 +147,8 @@ func resourceNextDNSPrivacyDelete(ctx context.Context, d *schema.ResourceData, m
 		ProfileID:         profileID,
 		PrivacyBlocklists: []*nextdns.PrivacyBlocklists{},
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", blocklist))
+
 	err := client.PrivacyBlocklists.Create(ctx, blocklist)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error deleting blocklist settings"))
@@ -105,6 +158,8 @@ func resourceNextDNSPrivacyDelete(ctx context.Context, d *schema.ResourceData, m
 		ProfileID:      profileID,
 		PrivacyNatives: []*nextdns.PrivacyNatives{},
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", natives))
+
 	err = client.PrivacyNatives.Create(ctx, natives)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error deleting native settings"))
@@ -114,6 +169,8 @@ func resourceNextDNSPrivacyDelete(ctx context.Context, d *schema.ResourceData, m
 		ProfileID: profileID,
 		Privacy:   &nextdns.Privacy{},
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", privacy))
+
 	err = client.Privacy.Update(ctx, privacy)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error deleting privacy settings"))
@@ -156,35 +213,31 @@ func buildPrivacy(d *schema.ResourceData) (*nextdns.Privacy, error) {
 		DisguisedTrackers: d.Get("disguised_trackers").(bool),
 	}
 
-	foundBlock, ok := d.GetOk("blocklists")
-	if !ok {
-		return nil, errors.New("unable to find blocklist in resource data")
-	}
+	privacy.Blocklists = []*nextdns.PrivacyBlocklists{}
+	if foundBlock, ok := d.GetOk("blocklists"); ok {
+		recordsBlock := foundBlock.([]interface{})
+		blocklist := make([]*nextdns.PrivacyBlocklists, len(recordsBlock))
 
-	recordsBlock := foundBlock.([]interface{})
-
-	blocklist := make([]*nextdns.PrivacyBlocklists, len(recordsBlock))
-	for k, v := range recordsBlock {
-		blocklist[k] = &nextdns.PrivacyBlocklists{
-			ID: v.(string),
+		for k, v := range recordsBlock {
+			blocklist[k] = &nextdns.PrivacyBlocklists{
+				ID: v.(string),
+			}
 		}
-	}
-	privacy.Blocklists = blocklist
-
-	foundNat, ok := d.GetOk("natives")
-	if !ok {
-		return nil, errors.New("unable to find natives in resource data")
+		privacy.Blocklists = blocklist
 	}
 
-	recordsNat := foundNat.([]interface{})
+	privacy.Natives = []*nextdns.PrivacyNatives{}
+	if foundNat, ok := d.GetOk("natives"); ok {
+		recordsNat := foundNat.([]interface{})
+		natives := make([]*nextdns.PrivacyNatives, len(recordsNat))
 
-	natives := make([]*nextdns.PrivacyNatives, len(recordsNat))
-	for k, v := range recordsNat {
-		natives[k] = &nextdns.PrivacyNatives{
-			ID: v.(string),
+		for k, v := range recordsNat {
+			natives[k] = &nextdns.PrivacyNatives{
+				ID: v.(string),
+			}
 		}
+		privacy.Natives = natives
 	}
-	privacy.Natives = natives
 
 	return privacy, nil
 }

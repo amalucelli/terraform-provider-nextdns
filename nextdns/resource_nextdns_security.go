@@ -2,8 +2,10 @@ package nextdns
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/amalucelli/nextdns-go/nextdns"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
@@ -28,13 +30,27 @@ func resourceNextDNSSecurityCreate(ctx context.Context, d *schema.ResourceData, 
 
 	sec, err := buildSecurity(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error building security settings from resource"))
+		return diag.FromErr(errors.Wrap(err, "error creating security settings"))
+	}
+	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", sec))
+
+	tlds := &nextdns.CreateSecurityTldsRequest{
+		ProfileID:    profileID,
+		SecurityTlds: sec.Tlds,
+	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", tlds))
+
+	err = client.SecurityTlds.Create(ctx, tlds)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error creating security tlds settings"))
 	}
 
 	request := &nextdns.UpdateSecurityRequest{
 		ProfileID: profileID,
 		Security:  sec,
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
+
 	err = client.Security.Update(ctx, request)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error creating security settings"))
@@ -84,11 +100,25 @@ func resourceNextDNSSecurityUpdate(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error updating security settings"))
 	}
+	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", sec))
+
+	tlds := &nextdns.CreateSecurityTldsRequest{
+		ProfileID:    profileID,
+		SecurityTlds: sec.Tlds,
+	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", tlds))
+
+	err = client.SecurityTlds.Create(ctx, tlds)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error updating security tlds settings"))
+	}
 
 	request := &nextdns.UpdateSecurityRequest{
 		ProfileID: profileID,
 		Security:  sec,
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
+
 	err = client.Security.Update(ctx, request)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error updating security settings"))
@@ -105,6 +135,8 @@ func resourceNextDNSSecurityDelete(ctx context.Context, d *schema.ResourceData, 
 		ProfileID:    profileID,
 		SecurityTlds: []*nextdns.SecurityTlds{},
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", tlds))
+
 	err := client.SecurityTlds.Create(ctx, tlds)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error deleting security tlds settings"))
@@ -114,6 +146,8 @@ func resourceNextDNSSecurityDelete(ctx context.Context, d *schema.ResourceData, 
 		ProfileID: profileID,
 		Security:  &nextdns.Security{},
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", sec))
+
 	err = client.Security.Update(ctx, sec)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error deleting security settings"))
@@ -157,20 +191,18 @@ func buildSecurity(d *schema.ResourceData) (*nextdns.Security, error) {
 		Csam:                    d.Get("csam").(bool),
 	}
 
-	found, ok := d.GetOk("tlds")
-	if !ok {
-		return nil, errors.New("unable to find tlds in resource data")
-	}
+	sec.Tlds = []*nextdns.SecurityTlds{}
+	if found, ok := d.GetOk("tlds"); ok {
+		recordsTlds := found.([]interface{})
+		tlds := make([]*nextdns.SecurityTlds, len(recordsTlds))
 
-	recordsTlds := found.([]interface{})
-
-	tlds := make([]*nextdns.SecurityTlds, len(recordsTlds))
-	for k, v := range recordsTlds {
-		tlds[k] = &nextdns.SecurityTlds{
-			ID: v.(string),
+		for k, v := range recordsTlds {
+			tlds[k] = &nextdns.SecurityTlds{
+				ID: v.(string),
+			}
 		}
+		sec.Tlds = tlds
 	}
-	sec.Tlds = tlds
 
 	return sec, nil
 }

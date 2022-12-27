@@ -2,8 +2,10 @@ package nextdns
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/amalucelli/nextdns-go/nextdns"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/pkg/errors"
@@ -30,11 +32,13 @@ func resourceNextDNSDenylistCreate(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error building deny list"))
 	}
+	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", denylist))
 
 	request := &nextdns.CreateDenylistRequest{
 		ProfileID: profileID,
 		Denylist:  denylist,
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
 
 	err = client.Denylist.Create(ctx, request)
 	if err != nil {
@@ -53,10 +57,13 @@ func resourceNextDNSDenylistRead(ctx context.Context, d *schema.ResourceData, me
 	request := &nextdns.GetDenylistRequest{
 		ProfileID: profileID,
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
+
 	denylist, err := client.Denylist.Get(ctx, request)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error getting deny list"))
 	}
+	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", denylist))
 
 	var domains []map[string]interface{}
 	var domain map[string]interface{}
@@ -85,11 +92,14 @@ func resourceNextDNSDenylistUpdate(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error building deny list"))
 	}
+	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", denylist))
 
 	request := &nextdns.CreateDenylistRequest{
 		ProfileID: profileID,
 		Denylist:  denylist,
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
+
 	err = client.Denylist.Create(ctx, request)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error updating deny list"))
@@ -106,6 +116,8 @@ func resourceNextDNSDenylistDelete(ctx context.Context, d *schema.ResourceData, 
 		ProfileID: profileID,
 		Denylist:  []*nextdns.Denylist{},
 	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
+
 	err := client.Denylist.Create(ctx, request)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error deleting deny list"))
