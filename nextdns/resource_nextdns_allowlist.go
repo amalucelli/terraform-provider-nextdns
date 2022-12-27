@@ -26,23 +26,18 @@ func resourceNextDNSAllowlistCreate(ctx context.Context, d *schema.ResourceData,
 	client := meta.(*nextdns.Client)
 	profileID := d.Get("profile_id").(string)
 
-	if domain, ok := d.GetOk("domain"); ok {
-		var Allowlist []*nextdns.Allowlist
-		for _, elem := range domain.(*schema.Set).List() {
-			Allowlist = append(Allowlist, &nextdns.Allowlist{
-				ID:     elem.(map[string]interface{})["id"].(string),
-				Active: elem.(map[string]interface{})["active"].(bool),
-			})
-		}
+	allowlist, err := buildAllowlist(d)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error building allow list"))
+	}
 
-		request := &nextdns.CreateAllowlistRequest{
-			ProfileID: profileID,
-			Allowlist: Allowlist,
-		}
-		err := client.Allowlist.Create(ctx, request)
-		if err != nil {
-			return diag.FromErr(errors.Wrap(err, "error creating allow list"))
-		}
+	request := &nextdns.CreateAllowlistRequest{
+		ProfileID: profileID,
+		Allowlist: allowlist,
+	}
+	err = client.Allowlist.Create(ctx, request)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error creating allow list"))
 	}
 
 	d.SetId(profileID)
@@ -85,23 +80,18 @@ func resourceNextDNSAllowlistUpdate(ctx context.Context, d *schema.ResourceData,
 	client := meta.(*nextdns.Client)
 	profileID := d.Get("profile_id").(string)
 
-	if domain, ok := d.GetOk("domain"); ok {
-		var Allowlist []*nextdns.Allowlist
-		for _, elem := range domain.(*schema.Set).List() {
-			Allowlist = append(Allowlist, &nextdns.Allowlist{
-				ID:     elem.(map[string]interface{})["id"].(string),
-				Active: elem.(map[string]interface{})["active"].(bool),
-			})
-		}
+	allowlist, err := buildAllowlist(d)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error building allow list"))
+	}
 
-		request := &nextdns.CreateAllowlistRequest{
-			ProfileID: profileID,
-			Allowlist: Allowlist,
-		}
-		err := client.Allowlist.Create(ctx, request)
-		if err != nil {
-			return diag.FromErr(errors.Wrap(err, "error updating allow list"))
-		}
+	request := &nextdns.CreateAllowlistRequest{
+		ProfileID: profileID,
+		Allowlist: allowlist,
+	}
+	err = client.Allowlist.Create(ctx, request)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error updating allow list"))
 	}
 
 	return resourceNextDNSAllowlistRead(ctx, d, meta)
@@ -131,4 +121,23 @@ func resourceNextDNSAllowlistImport(ctx context.Context, d *schema.ResourceData,
 	resourceNextDNSAllowlistRead(ctx, d, meta)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func buildAllowlist(d *schema.ResourceData) ([]*nextdns.Allowlist, error) {
+	found, ok := d.GetOk("domain")
+	if !ok {
+		return nil, errors.New("unable to find domain in resource data")
+	}
+
+	records := found.(*schema.Set).List()
+
+	allowlist := make([]*nextdns.Allowlist, len(records))
+	for k, v := range records {
+		allowlist[k] = &nextdns.Allowlist{
+			ID:     v.(map[string]interface{})["id"].(string),
+			Active: v.(map[string]interface{})["active"].(bool),
+		}
+	}
+
+	return allowlist, nil
 }

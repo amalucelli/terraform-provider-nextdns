@@ -157,13 +157,15 @@ func buildSecurity(d *schema.ResourceData) (*nextdns.Security, error) {
 		Csam:                    d.Get("csam").(bool),
 	}
 
-	rtlds, ok := d.Get("tlds").([]interface{})
+	found, ok := d.GetOk("tlds")
 	if !ok {
-		return nil, errors.New("unable to create interface array type assertion")
+		return nil, errors.New("unable to find tlds in resource data")
 	}
 
-	tlds := make([]*nextdns.SecurityTlds, (len(rtlds)))
-	for k, v := range rtlds {
+	recordsTlds := found.([]interface{})
+
+	tlds := make([]*nextdns.SecurityTlds, len(recordsTlds))
+	for k, v := range recordsTlds {
 		tlds[k] = &nextdns.SecurityTlds{
 			ID: v.(string),
 		}

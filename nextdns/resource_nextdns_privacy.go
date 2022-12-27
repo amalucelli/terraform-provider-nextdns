@@ -156,26 +156,30 @@ func buildPrivacy(d *schema.ResourceData) (*nextdns.Privacy, error) {
 		DisguisedTrackers: d.Get("disguised_trackers").(bool),
 	}
 
-	rblocklist, ok := d.Get("blocklists").([]interface{})
+	foundBlock, ok := d.GetOk("blocklists")
 	if !ok {
-		return nil, errors.New("unable to create interface array type assertion")
+		return nil, errors.New("unable to find blocklist in resource data")
 	}
 
-	blocklist := make([]*nextdns.PrivacyBlocklists, (len(rblocklist)))
-	for k, v := range rblocklist {
+	recordsBlock := foundBlock.([]interface{})
+
+	blocklist := make([]*nextdns.PrivacyBlocklists, len(recordsBlock))
+	for k, v := range recordsBlock {
 		blocklist[k] = &nextdns.PrivacyBlocklists{
 			ID: v.(string),
 		}
 	}
 	privacy.Blocklists = blocklist
 
-	rnatives, ok := d.Get("natives").([]interface{})
+	foundNat, ok := d.GetOk("natives")
 	if !ok {
-		return nil, errors.New("unable to create interface array type assertion")
+		return nil, errors.New("unable to find natives in resource data")
 	}
 
-	natives := make([]*nextdns.PrivacyNatives, (len(rnatives)))
-	for k, v := range rnatives {
+	recordsNat := foundNat.([]interface{})
+
+	natives := make([]*nextdns.PrivacyNatives, len(recordsNat))
+	for k, v := range recordsNat {
 		natives[k] = &nextdns.PrivacyNatives{
 			ID: v.(string),
 		}

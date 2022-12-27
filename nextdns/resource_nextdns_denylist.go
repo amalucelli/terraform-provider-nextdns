@@ -26,23 +26,19 @@ func resourceNextDNSDenylistCreate(ctx context.Context, d *schema.ResourceData, 
 	client := meta.(*nextdns.Client)
 	profileID := d.Get("profile_id").(string)
 
-	if domain, ok := d.GetOk("domain"); ok {
-		var denylist []*nextdns.Denylist
-		for _, elem := range domain.(*schema.Set).List() {
-			denylist = append(denylist, &nextdns.Denylist{
-				ID:     elem.(map[string]interface{})["id"].(string),
-				Active: elem.(map[string]interface{})["active"].(bool),
-			})
-		}
+	denylist, err := buildDenylist(d)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error building deny list"))
+	}
 
-		request := &nextdns.CreateDenylistRequest{
-			ProfileID: profileID,
-			Denylist:  denylist,
-		}
-		err := client.Denylist.Create(ctx, request)
-		if err != nil {
-			return diag.FromErr(errors.Wrap(err, "error creating deny list"))
-		}
+	request := &nextdns.CreateDenylistRequest{
+		ProfileID: profileID,
+		Denylist:  denylist,
+	}
+
+	err = client.Denylist.Create(ctx, request)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error creating deny list"))
 	}
 
 	d.SetId(profileID)
@@ -85,23 +81,18 @@ func resourceNextDNSDenylistUpdate(ctx context.Context, d *schema.ResourceData, 
 	client := meta.(*nextdns.Client)
 	profileID := d.Get("profile_id").(string)
 
-	if domain, ok := d.GetOk("domain"); ok {
-		var denylist []*nextdns.Denylist
-		for _, elem := range domain.(*schema.Set).List() {
-			denylist = append(denylist, &nextdns.Denylist{
-				ID:     elem.(map[string]interface{})["id"].(string),
-				Active: elem.(map[string]interface{})["active"].(bool),
-			})
-		}
+	denylist, err := buildDenylist(d)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error building deny list"))
+	}
 
-		request := &nextdns.CreateDenylistRequest{
-			ProfileID: profileID,
-			Denylist:  denylist,
-		}
-		err := client.Denylist.Create(ctx, request)
-		if err != nil {
-			return diag.FromErr(errors.Wrap(err, "error updating deny list"))
-		}
+	request := &nextdns.CreateDenylistRequest{
+		ProfileID: profileID,
+		Denylist:  denylist,
+	}
+	err = client.Denylist.Create(ctx, request)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error updating deny list"))
 	}
 
 	return resourceNextDNSDenylistRead(ctx, d, meta)
@@ -131,4 +122,23 @@ func resourceNextDNSDenylistImport(ctx context.Context, d *schema.ResourceData, 
 	resourceNextDNSDenylistRead(ctx, d, meta)
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func buildDenylist(d *schema.ResourceData) ([]*nextdns.Denylist, error) {
+	found, ok := d.GetOk("domain")
+	if !ok {
+		return nil, errors.New("unable to find domain in resource data")
+	}
+
+	records := found.(*schema.Set).List()
+
+	denylist := make([]*nextdns.Denylist, len(records))
+	for k, v := range records {
+		denylist[k] = &nextdns.Denylist{
+			ID:     v.(map[string]interface{})["id"].(string),
+			Active: v.(map[string]interface{})["active"].(bool),
+		}
+	}
+
+	return denylist, nil
 }
