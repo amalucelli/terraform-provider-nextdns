@@ -39,28 +39,54 @@ resource "nextdns_parental_control" "this" {
   block_bypass            = true
 
   service {
-    id     = "tiktok"
-    active = true
+    id         = "tiktok"
+    active     = true
+    recreation = false
   }
 
   service {
-    id     = "instagram"
-    active = false
+    id         = "instagram"
+    active     = false
+    recreation = false
   }
 
   service {
-    id     = "facebook"
-    active = true
+    id         = "facebook"
+    active     = true
+    recreation = true
   }
 
   category {
-    id     = "dating"
-    active = false
+    id         = "dating"
+    active     = false
+    recreation = true
   }
 
   category {
-    id     = "gambling"
-    active = true
+    id         = "gambling"
+    active     = false
+    recreation = false
+  }
+
+  recreation {
+    timezone = "America/New_York"
+
+    monday {
+      start = "07:02:00"
+      end   = "23:00:00"
+    }
+    saturday {
+      start = "20:22:00"
+      end   = "23:33:00"
+    }
+    friday {
+      start = "12:00:00"
+      end   = "15:35:00"
+    }
+    sunday {
+      start = "01:00:00"
+      end   = "23:00:00"
+    }
   }
 }
 

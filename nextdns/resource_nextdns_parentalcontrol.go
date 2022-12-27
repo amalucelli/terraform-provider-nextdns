@@ -87,12 +87,76 @@ func resourceNextDNSParentalControlRead(ctx context.Context, d *schema.ResourceD
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", parentalControl))
 
-	var services []map[string]interface{}
+	if parentalControl.Recreation != nil {
+		recreation := map[string]interface{}{}
+		recreation["timezone"] = parentalControl.Recreation.Timezone
 
+		if parentalControl.Recreation.Times.Monday != nil {
+			recreation["monday"] = []map[string]interface{}{
+				{
+					"start": parentalControl.Recreation.Times.Monday.Start,
+					"end":   parentalControl.Recreation.Times.Monday.End,
+				},
+			}
+		}
+		if parentalControl.Recreation.Times.Tuesday != nil {
+			recreation["tuesday"] = []map[string]interface{}{
+				{
+					"start": parentalControl.Recreation.Times.Tuesday.Start,
+					"end":   parentalControl.Recreation.Times.Tuesday.End,
+				},
+			}
+		}
+		if parentalControl.Recreation.Times.Wednesday != nil {
+			recreation["wednesday"] = []map[string]interface{}{
+				{
+					"start": parentalControl.Recreation.Times.Wednesday.Start,
+					"end":   parentalControl.Recreation.Times.Wednesday.End,
+				},
+			}
+		}
+		if parentalControl.Recreation.Times.Thursday != nil {
+			recreation["thursday"] = []map[string]interface{}{
+				{
+					"start": parentalControl.Recreation.Times.Thursday.Start,
+					"end":   parentalControl.Recreation.Times.Thursday.End,
+				},
+			}
+		}
+		if parentalControl.Recreation.Times.Friday != nil {
+			recreation["friday"] = []map[string]interface{}{
+				{
+					"start": parentalControl.Recreation.Times.Friday.Start,
+					"end":   parentalControl.Recreation.Times.Friday.End,
+				},
+			}
+		}
+		if parentalControl.Recreation.Times.Saturday != nil {
+			recreation["saturday"] = []map[string]interface{}{
+				{
+					"start": parentalControl.Recreation.Times.Saturday.Start,
+					"end":   parentalControl.Recreation.Times.Saturday.End,
+				},
+			}
+		}
+		if parentalControl.Recreation.Times.Sunday != nil {
+			recreation["sunday"] = []map[string]interface{}{
+				{
+					"start": parentalControl.Recreation.Times.Sunday.Start,
+					"end":   parentalControl.Recreation.Times.Sunday.End,
+				},
+			}
+		}
+
+		d.Set("recreation", []map[string]interface{}{recreation})
+	}
+
+	var services []map[string]interface{}
 	for _, s := range parentalControl.Services {
 		service := make(map[string]interface{})
 		service["id"] = s.ID
 		service["active"] = s.Active
+		service["recreation"] = s.Recreation
 
 		services = append(services, service)
 	}
@@ -101,11 +165,11 @@ func resourceNextDNSParentalControlRead(ctx context.Context, d *schema.ResourceD
 	}
 
 	var categories []map[string]interface{}
-
 	for _, c := range parentalControl.Categories {
 		category := make(map[string]interface{})
 		category["id"] = c.ID
 		category["active"] = c.Active
+		category["recreation"] = c.Recreation
 
 		categories = append(categories, category)
 	}
@@ -226,6 +290,67 @@ func buildParentalControl(d *schema.ResourceData) (*nextdns.ParentalControl, err
 		YoutubeRestrictedMode: d.Get("youtube_restricted_mode").(bool),
 	}
 
+	ParentalControl.Recreation = &nextdns.ParentalControlRecreation{}
+	if _, ok := d.GetOk("recreation"); ok {
+		times := &nextdns.ParentalControlRecreationTimes{}
+
+		if _, ok := d.GetOk("recreation.0.monday"); ok {
+			times.Monday = &nextdns.ParentalControlRecreationInterval{
+				Start: d.Get("recreation.0.monday.0.start").(string),
+				End:   d.Get("recreation.0.monday.0.end").(string),
+			}
+		}
+
+		if _, ok := d.GetOk("recreation.0.tuesday"); ok {
+			times.Tuesday = &nextdns.ParentalControlRecreationInterval{
+				Start: d.Get("recreation.0.tuesday.0.start").(string),
+				End:   d.Get("recreation.0.tuesday.0.end").(string),
+			}
+		}
+
+		if _, ok := d.GetOk("recreation.0.wednesday"); ok {
+			times.Wednesday = &nextdns.ParentalControlRecreationInterval{
+				Start: d.Get("recreation.0.wednesday.0.start").(string),
+				End:   d.Get("recreation.0.wednesday.0.end").(string),
+			}
+		}
+
+		if _, ok := d.GetOk("recreation.0.thursday"); ok {
+			times.Thursday = &nextdns.ParentalControlRecreationInterval{
+				Start: d.Get("recreation.0.thursday.0.start").(string),
+				End:   d.Get("recreation.0.thursday.0.end").(string),
+			}
+		}
+
+		if _, ok := d.GetOk("recreation.0.friday"); ok {
+			times.Friday = &nextdns.ParentalControlRecreationInterval{
+				Start: d.Get("recreation.0.friday.0.start").(string),
+				End:   d.Get("recreation.0.friday.0.end").(string),
+			}
+		}
+
+		if _, ok := d.GetOk("recreation.0.saturday"); ok {
+			times.Saturday = &nextdns.ParentalControlRecreationInterval{
+				Start: d.Get("recreation.0.saturday.0.start").(string),
+				End:   d.Get("recreation.0.saturday.0.end").(string),
+			}
+		}
+
+		if _, ok := d.GetOk("recreation.0.sunday"); ok {
+			times.Sunday = &nextdns.ParentalControlRecreationInterval{
+				Start: d.Get("recreation.0.sunday.0.start").(string),
+				End:   d.Get("recreation.0.sunday.0.end").(string),
+			}
+		}
+
+		recreation := &nextdns.ParentalControlRecreation{
+			Times:    times,
+			Timezone: d.Get("recreation.0.timezone").(string),
+		}
+
+		ParentalControl.Recreation = recreation
+	}
+
 	ParentalControl.Services = []*nextdns.ParentalControlServices{}
 	if foundSvc, ok := d.GetOk("service"); ok {
 		recordsSvc := foundSvc.(*schema.Set).List()
@@ -233,8 +358,9 @@ func buildParentalControl(d *schema.ResourceData) (*nextdns.ParentalControl, err
 
 		for k, v := range recordsSvc {
 			services[k] = &nextdns.ParentalControlServices{
-				ID:     v.(map[string]interface{})["id"].(string),
-				Active: v.(map[string]interface{})["active"].(bool),
+				ID:         v.(map[string]interface{})["id"].(string),
+				Active:     v.(map[string]interface{})["active"].(bool),
+				Recreation: v.(map[string]interface{})["recreation"].(bool),
 			}
 		}
 		ParentalControl.Services = services
@@ -247,8 +373,9 @@ func buildParentalControl(d *schema.ResourceData) (*nextdns.ParentalControl, err
 
 		for k, v := range recordsCat {
 			categories[k] = &nextdns.ParentalControlCategories{
-				ID:     v.(map[string]interface{})["id"].(string),
-				Active: v.(map[string]interface{})["active"].(bool),
+				ID:         v.(map[string]interface{})["id"].(string),
+				Active:     v.(map[string]interface{})["active"].(bool),
+				Recreation: v.(map[string]interface{})["recreation"].(bool),
 			}
 		}
 		ParentalControl.Categories = categories
