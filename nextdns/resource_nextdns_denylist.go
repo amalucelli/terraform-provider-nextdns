@@ -54,12 +54,12 @@ func resourceNextDNSDenylistRead(ctx context.Context, d *schema.ResourceData, me
 	client := meta.(*nextdns.Client)
 	profileID := d.Get("profile_id").(string)
 
-	request := &nextdns.GetDenylistRequest{
+	request := &nextdns.ListDenylistRequest{
 		ProfileID: profileID,
 	}
 	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
 
-	denylist, err := client.Denylist.Get(ctx, request)
+	denylist, err := client.Denylist.List(ctx, request)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error getting deny list"))
 	}

@@ -54,12 +54,12 @@ func resourceNextDNSAllowlistRead(ctx context.Context, d *schema.ResourceData, m
 	client := meta.(*nextdns.Client)
 	profileID := d.Get("profile_id").(string)
 
-	request := &nextdns.GetAllowlistRequest{
+	request := &nextdns.ListAllowlistRequest{
 		ProfileID: profileID,
 	}
 	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
 
-	allowlist, err := client.Allowlist.Get(ctx, request)
+	allowlist, err := client.Allowlist.List(ctx, request)
 	if err != nil {
 		return diag.FromErr(errors.Wrap(err, "error getting allow list"))
 	}
