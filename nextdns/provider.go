@@ -21,6 +21,7 @@ func Provider() *schema.Provider {
 			"nextdns_allowlist":        resourceNextDNSAllowlist(),
 			"nextdns_denylist":         resourceNextDNSDenylist(),
 			"nextdns_privacy":          resourceNextDNSPrivacy(),
+			"nextdns_profile":          resourceNextDNSProfile(),
 			"nextdns_parental_control": resourceNextDNSParentalControl(),
 			"nextdns_security":         resourceNextDNSSecurity(),
 			"nextdns_settings":         resourceNextDNSSettings(),

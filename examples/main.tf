@@ -3,6 +3,12 @@ variable "profile_id" {
   default = "abc123"
 }
 
+resource "nextdns_profile" "this" {
+  profile_id = var.profile_id
+
+  name = "terraform-provider-nextdns"
+}
+
 resource "nextdns_denylist" "this" {
   profile_id = var.profile_id
 
