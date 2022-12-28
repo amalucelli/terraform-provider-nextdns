@@ -23,6 +23,7 @@ func Provider() *schema.Provider {
 			"nextdns_privacy":          resourceNextDNSPrivacy(),
 			"nextdns_parental_control": resourceNextDNSParentalControl(),
 			"nextdns_security":         resourceNextDNSSecurity(),
+			"nextdns_settings":         resourceNextDNSSettings(),
 		},
 		ConfigureContextFunc: configure,
 	}

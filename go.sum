@@ -3,8 +3,8 @@ cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMT
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/agext/levenshtein v1.2.3 h1:YB2fHEn0UJagG8T1rrWknE3ZQzWM06O8AMAatNn7lmo=
 github.com/agext/levenshtein v1.2.3/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
-github.com/amalucelli/nextdns-go v0.3.0 h1:u8aZlY94QOwH8aYTbvXXtFLHsUc1P3bIQP2ObolFBXs=
-github.com/amalucelli/nextdns-go v0.3.0/go.mod h1:7LcYoz6xw67CVfDjR5g70mpcFTbZzvztH2jiCmCR5iU=
+github.com/amalucelli/nextdns-go v0.3.1 h1:emanj4ueTuiY6Wq3cA0uEE2LNQx/n1n3+b9izbKSEwg=
+github.com/amalucelli/nextdns-go v0.3.1/go.mod h1:7LcYoz6xw67CVfDjR5g70mpcFTbZzvztH2jiCmCR5iU=
 github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
 github.com/apparentlymart/go-dump v0.0.0-20190214190832-042adf3cf4a0 h1:MzVXffFUye+ZcSR6opIgz9Co7WcDx6ZcY+RjfFHoA0I=
 github.com/apparentlymart/go-textseg v1.0.0/go.mod h1:z96Txxhf3xSFMPmb5X/1W05FF/Nj9VFpLOpjS5yuumk=

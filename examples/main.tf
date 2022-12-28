@@ -141,6 +141,34 @@ resource "nextdns_privacy" "this" {
   ]
 }
 
+resource "nextdns_settings" "this" {
+  profile_id = var.profile_id
+
+  logs {
+    enabled = true
+
+    privacy {
+      log_clients_ip = true
+      log_domains    = true
+    }
+
+    retention = 7776000
+    location  = "us"
+  }
+
+  block_page {
+    enabled = true
+  }
+
+  performance {
+    ecs              = true
+    cache_boost      = true
+    cname_flattening = true
+  }
+
+  web3 = true
+}
+
 terraform {
   required_providers {
     nextdns = {
