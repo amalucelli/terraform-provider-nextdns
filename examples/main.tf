@@ -112,12 +112,12 @@ resource "nextdns_security" "this" {
   parking                   = true
   csam                      = false
 
-  tlds = [
+  tlds = toset([
     "pizza",
     "beer",
     "meme",
     "ninja",
-  ]
+  ])
 }
 
 resource "nextdns_privacy" "this" {
@@ -126,16 +126,16 @@ resource "nextdns_privacy" "this" {
   disguised_trackers = true
   allow_affiliate    = false
 
-  blocklists = [
+  blocklists = toset([
     "nextdns-recommended",
     "easylist",
     "goodbye-ads",
     "1hosts-pro",
     "easyprivacy",
     "adguard-base-filter",
-  ]
+  ])
 
-  natives = [
+  natives = toset([
     "apple",
     "alexa",
     "windows",
@@ -144,7 +144,7 @@ resource "nextdns_privacy" "this" {
     "roku",
     "sonos",
     "samsung",
-  ]
+  ])
 }
 
 resource "nextdns_settings" "this" {
