@@ -66,10 +66,9 @@ func resourceNextDNSAllowlistRead(ctx context.Context, d *schema.ResourceData, m
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", allowlist))
 
 	var domains []map[string]interface{}
-	var domain map[string]interface{}
 
 	for _, d := range allowlist {
-		domain = make(map[string]interface{})
+		domain := make(map[string]interface{})
 		domain["id"] = d.ID
 		domain["active"] = d.Active
 
