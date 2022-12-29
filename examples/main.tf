@@ -175,6 +175,20 @@ resource "nextdns_settings" "this" {
   web3 = true
 }
 
+resource "nextdns_rewrite" "this" {
+  profile_id = var.profile_id
+
+  rewrite {
+    domain  = "google.com"
+    address = "1.1.1.1"
+  }
+
+  rewrite {
+    domain  = "cloudflare.com"
+    address = "8.8.8.8"
+  }
+}
+
 terraform {
   required_providers {
     nextdns = {
