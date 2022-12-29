@@ -158,7 +158,7 @@ resource "nextdns_settings" "this" {
       log_domains    = true
     }
 
-    retention = 7776000
+    retention = "1 day"
     location  = "us"
   }
 

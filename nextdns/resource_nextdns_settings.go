@@ -3,6 +3,7 @@ package nextdns
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/amalucelli/nextdns-go/nextdns"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -106,7 +107,7 @@ func resourceNextDNSSettingsRead(ctx context.Context, d *schema.ResourceData, me
 			"log_domains":    invertPrivacySettings(settings.Logs.Drop.Domain),
 		},
 	}
-	logs["retention"] = settings.Logs.Retention
+	logs["retention"] = convertSecondsToRetention(settings.Logs.Retention)
 	logs["location"] = settings.Logs.Location
 
 	d.Set("logs", []map[string]interface{}{logs})
@@ -254,7 +255,7 @@ func buildSettings(d *schema.ResourceData) (*nextdns.Settings, error) {
 			IP:     invertPrivacySettings(d.Get("logs.0.privacy.0.log_clients_ip").(bool)),
 			Domain: invertPrivacySettings(d.Get("logs.0.privacy.0.log_domains").(bool)),
 		},
-		Retention: d.Get("logs.0.retention").(int),
+		Retention: convertRetentionToSeconds(d.Get("logs.0.retention").(string)),
 		Location:  d.Get("logs.0.location").(string),
 	}
 
@@ -276,6 +277,65 @@ func buildSettings(d *schema.ResourceData) (*nextdns.Settings, error) {
 	}
 
 	return Settings, nil
+}
+
+func convertRetentionToSeconds(retention string) int {
+	switch retention {
+	case "1 hour":
+		d := time.Hour
+		return int(d.Seconds())
+	case "6 hours":
+		d := time.Hour * 6
+		return int(d.Seconds())
+	case "1 day":
+		d := time.Hour * 24
+		return int(d.Seconds())
+	case "1 week":
+		d := time.Hour * 24 * 7
+		return int(d.Seconds())
+	case "1 month":
+		d := time.Hour * 24 * 30
+		return int(d.Seconds())
+	case "3 months":
+		d := time.Hour * 24 * 90
+		return int(d.Seconds())
+	case "6 months":
+		d := time.Hour * 24 * 180
+		return int(d.Seconds())
+	case "1 year":
+		d := time.Hour * 24 * 365
+		return int(d.Seconds())
+	case "2 years":
+		d := time.Hour * 24 * 365 * 2
+		return int(d.Seconds())
+	default:
+		return 0
+	}
+}
+
+func convertSecondsToRetention(seconds int) string {
+	switch seconds {
+	case int(time.Hour.Seconds()):
+		return "1 hour"
+	case int(time.Hour.Seconds() * 6):
+		return "6 hours"
+	case int(time.Hour.Seconds() * 24):
+		return "1 day"
+	case int(time.Hour.Seconds() * 24 * 7):
+		return "1 week"
+	case int(time.Hour.Seconds() * 24 * 30):
+		return "1 month"
+	case int(time.Hour.Seconds() * 24 * 90):
+		return "3 months"
+	case int(time.Hour.Seconds() * 24 * 180):
+		return "6 months"
+	case int(time.Hour.Seconds() * 24 * 365):
+		return "1 year"
+	case int(time.Hour.Seconds() * 24 * 365 * 2):
+		return "2 years"
+	default:
+		return ""
+	}
 }
 
 // invertPrivacySettings inverts the privacy settings,

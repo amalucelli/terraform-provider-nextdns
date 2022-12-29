@@ -2,6 +2,7 @@ package nextdns
 
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 func resourceNextDNSSettingsSchema() map[string]*schema.Schema {
@@ -40,11 +41,11 @@ func resourceNextDNSSettingsSchema() map[string]*schema.Schema {
 							},
 						},
 					},
-					// TODO(amalucelli): Move this to string and parse to int in the provider.
 					"retention": {
-						Description: "Retention period for logs.",
-						Type:        schema.TypeInt,
-						Required:    true,
+						Description:  "Retention period for logs.",
+						Type:         schema.TypeString,
+						Required:     true,
+						ValidateFunc: validation.StringInSlice([]string{"1 hour", "6 hours", "1 day", "1 week", "1 month", "3 months", "6 months", "1 year", "2 years"}, false),
 					},
 					"location": {
 						Description: "Location of the logs.",
