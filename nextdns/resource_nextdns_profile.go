@@ -96,9 +96,21 @@ func resourceNextDNSProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 	return resourceNextDNSProfileRead(ctx, d, meta)
 }
 
-// We don't want to actually delete the profile, but only remove it from the state.
 func resourceNextDNSProfileDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return resourceNextDNSProfileRead(ctx, d, meta)
+	client := meta.(*nextdns.Client)
+	profileID := d.Get("profile_id").(string)
+
+	request := &nextdns.DeleteProfileRequest{
+		ProfileID: profileID,
+	}
+	tflog.Debug(ctx, fmt.Sprintf("request to nextdns api: %+v", request))
+
+	err := client.Profiles.Delete(ctx, request)
+	if err != nil {
+		return diag.FromErr(errors.Wrap(err, "error deleting profile"))
+	}
+
+	return nil
 }
 
 func resourceNextDNSProfileImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
