@@ -9,7 +9,7 @@ func resourceNextDNSProfileSchema() map[string]*schema.Schema {
 		"profile_id": {
 			Description: "The profile identifier to target the resource.",
 			Type:        schema.TypeString,
-			Required:    true,
+			Computed:    true,
 		},
 		"name": {
 			Description: "Profile name.",
