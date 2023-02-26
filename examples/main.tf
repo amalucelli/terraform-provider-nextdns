@@ -1,16 +1,9 @@
-variable "profile_id" {
-  type    = string
-  default = "abc123"
-}
-
 resource "nextdns_profile" "this" {
-  profile_id = var.profile_id
-
   name = "terraform-provider-nextdns"
 }
 
 resource "nextdns_denylist" "this" {
-  profile_id = var.profile_id
+  profile_id = nextdns_profile.this.id
 
   domain {
     id     = "google.com"
@@ -24,7 +17,7 @@ resource "nextdns_denylist" "this" {
 }
 
 resource "nextdns_allowlist" "this" {
-  profile_id = var.profile_id
+  profile_id = nextdns_profile.this.id
 
   domain {
     id     = "search.brave.com"
@@ -38,7 +31,7 @@ resource "nextdns_allowlist" "this" {
 }
 
 resource "nextdns_parental_control" "this" {
-  profile_id = var.profile_id
+  profile_id = nextdns_profile.this.id
 
   safe_search             = true
   youtube_restricted_mode = false
@@ -97,7 +90,7 @@ resource "nextdns_parental_control" "this" {
 }
 
 resource "nextdns_security" "this" {
-  profile_id = var.profile_id
+  profile_id = nextdns_profile.this.id
 
   threat_intelligence_feeds = true
   ai_threat_detection       = false
@@ -121,7 +114,7 @@ resource "nextdns_security" "this" {
 }
 
 resource "nextdns_privacy" "this" {
-  profile_id = var.profile_id
+  profile_id = nextdns_profile.this.id
 
   disguised_trackers = true
   allow_affiliate    = false
@@ -148,7 +141,7 @@ resource "nextdns_privacy" "this" {
 }
 
 resource "nextdns_settings" "this" {
-  profile_id = var.profile_id
+  profile_id = nextdns_profile.this.id
 
   logs {
     enabled = true
@@ -176,7 +169,7 @@ resource "nextdns_settings" "this" {
 }
 
 resource "nextdns_rewrite" "this" {
-  profile_id = var.profile_id
+  profile_id = nextdns_profile.this.id
 
   rewrite {
     domain  = "google.com"
