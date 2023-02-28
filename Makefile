@@ -12,12 +12,19 @@ NAME := nextdns
 # Terraform requieres a specific format.
 BINARY := terraform-provider-${NAME}
 
+.PHONY: build
 build:
 	@go build -o ${BINARY}
 
+.PHONY: install
 install: build
 	@mkdir -p ~/.terraform.d/plugins/${REGISTRY}/${ORG}/${NAME}/${VERSION}/${GOOS}_${GOARCH}
 	@mv ${BINARY} ~/.terraform.d/plugins/${REGISTRY}/${ORG}/${NAME}/${VERSION}/${GOOS}_${GOARCH}
 
+.PHONY: clean
 clean:
 	@rm -rf examples/.terraform* examples/terraform.*
+
+.PHONY: test
+test:
+	@go test ./...
