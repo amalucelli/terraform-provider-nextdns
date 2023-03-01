@@ -270,7 +270,6 @@ func resourceNextDNSParentalControlDelete(ctx context.Context, d *schema.Resourc
 	}
 
 	return resourceNextDNSParentalControlRead(ctx, d, meta)
-
 }
 
 func resourceNextDNSParentalControlImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {

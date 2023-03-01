@@ -28,3 +28,20 @@ clean:
 .PHONY: test
 test:
 	@go test ./...
+
+.PHONY: lint
+lint:
+	@golangci-lint run ./...
+
+.PHONY: tflint
+tflint:
+	@tfproviderlint ./...
+
+.PHONY: fmt
+fmt:
+	@gofmt -s -w .
+
+.PHONY: tools
+tools:
+	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	@go install github.com/bflad/tfproviderlint/cmd/tfproviderlint@latest
