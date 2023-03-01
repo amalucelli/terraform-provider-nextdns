@@ -18,6 +18,7 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup
+        name: Setup
       - name: Build
         run: make build
   test:
@@ -28,6 +29,7 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup
+        name: Setup
       - name: Test
         run: make test
   lint:
@@ -38,8 +40,9 @@ jobs:
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup
-      - name: Lint
-        uses: golangci/golangci-lint-action@v3
+        name: Setup
+      - uses: golangci/golangci-lint-action@v3
+        name: Lint
         with:
           version: latest
           only-new-issues: true
