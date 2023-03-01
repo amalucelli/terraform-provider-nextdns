@@ -187,6 +187,7 @@ func resourceNextDNSSettingsUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	return resourceNextDNSSettingsRead(ctx, d, meta)
 }
+
 func resourceNextDNSSettingsDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*nextdns.Client)
 	profileID := d.Get("profile_id").(string)

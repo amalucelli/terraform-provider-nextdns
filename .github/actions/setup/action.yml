@@ -1,0 +1,10 @@
+name: Setup
+description: Setup Go
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568 # actions/setup-go@v3
+      name: Set up Go
+      with:
+        go-version: 1.19
+        cache: true
