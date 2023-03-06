@@ -3,6 +3,7 @@ package nextdns
 import (
 	"context"
 	"fmt"
+	"regexp"
 
 	"github.com/amalucelli/nextdns-go/nextdns"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -43,6 +44,26 @@ func resourceNextDNSProfileCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceNextDNSProfileRead(ctx, d, meta)
 }
 
+func formatProfileIPv6Suffix(profileID []byte) []byte {
+	re := regexp.MustCompile(`(?P<quartet>[a-f0-9]{4})`)
+
+	reverseProfileID := make([]byte, len(profileID))
+	for i := len(profileID); i > 0; i-- {
+		reverseProfileID[len(profileID)-i] = profileID[i-1]
+	}
+
+	reverseFormatted := re.ReplaceAll(reverseProfileID, []byte("$quartet:"))
+	formatted := make([]byte, len(reverseFormatted))
+	for i := len(reverseFormatted); i > 0; i-- {
+		formatted[len(reverseFormatted)-i] = reverseFormatted[i-1]
+	}
+
+	if formatted[0] == ':' {
+		return formatted[1:]
+	}
+	return formatted
+}
+
 func resourceNextDNSProfileRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*nextdns.Client)
 	profileID := d.Get("profile_id").(string)
@@ -63,6 +84,13 @@ func resourceNextDNSProfileRead(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	d.SetId(profileID)
+
+	d.Set("endpoint_doh", fmt.Sprintf("https://dns.nextdns.io/%s", profileID))
+	d.Set("endpoint_dot", fmt.Sprintf("%s.dns.nextdns.io", profileID))
+	d.Set("endpoint_ipv6", []string{
+		fmt.Sprintf("2a07:a8c0::%s", formatProfileIPv6Suffix([]byte(profileID))),
+		fmt.Sprintf("2a07:a8c1::%s", formatProfileIPv6Suffix([]byte(profileID))),
+	})
 
 	return nil
 }
