@@ -190,3 +190,23 @@ terraform {
     }
   }
 }
+
+output "doh" {
+  description = "The DNS over HTTPS address the profile is reachable at"
+  value = nextdns_profile.this.endpoint[0].dot
+}
+
+output "dot" {
+  description = "The DNS over TLS address the profile is reachable at"
+  value = nextdns_profile.this.endpoint[0].doh
+}
+
+output "ipv6" {
+  description = "The IPv6 address the profile is reachable at"
+  value = nextdns_profile.this.endpoint[0].ipv6
+}
+
+output "servers" {
+  description = "The DNS servers available for the profile"
+  value = nextdns_profile.this.linkedip[0].servers
+}
