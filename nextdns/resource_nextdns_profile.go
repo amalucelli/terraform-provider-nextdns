@@ -64,6 +64,21 @@ func resourceNextDNSProfileRead(ctx context.Context, d *schema.ResourceData, met
 
 	d.SetId(profileID)
 
+	endpoint := map[string]interface{}{}
+	endpoint["doh"] = DNSOverHTTPSAddress(profileID)
+	endpoint["dot"] = DNSOverTLSAddress(profileID)
+	endpoint["ipv4"] = profile.Setup.Ipv4
+	endpoint["ipv6"] = profile.Setup.Ipv6
+
+	d.Set("endpoint", []map[string]interface{}{endpoint})
+
+	linkedip := map[string]interface{}{}
+	linkedip["servers"] = profile.Setup.LinkedIP.Servers
+	linkedip["ip"] = profile.Setup.LinkedIP.IP
+	linkedip["update_token"] = profile.Setup.LinkedIP.UpdateToken
+
+	d.Set("linkedip", []map[string]interface{}{linkedip})
+
 	return nil
 }
 
