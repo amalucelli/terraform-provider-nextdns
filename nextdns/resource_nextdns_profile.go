@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/pkg/errors"
 )
 
 func resourceNextDNSProfile() *schema.Resource {
@@ -34,7 +33,7 @@ func resourceNextDNSProfileCreate(ctx context.Context, d *schema.ResourceData, m
 
 	profileID, err := client.Profiles.Create(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating profile"))
+		return diag.FromErr(fmt.Errorf("error creating profile: %w", err))
 	}
 
 	d.SetId(profileID)
@@ -54,7 +53,7 @@ func resourceNextDNSProfileRead(ctx context.Context, d *schema.ResourceData, met
 
 	profile, err := client.Profiles.Get(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error getting profile"))
+		return diag.FromErr(fmt.Errorf("error getting profile: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", profile))
 
@@ -84,7 +83,7 @@ func resourceNextDNSProfileUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	err := client.Profiles.Update(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error updating profile"))
+		return diag.FromErr(fmt.Errorf("error updating profile: %w", err))
 	}
 
 	return resourceNextDNSProfileRead(ctx, d, meta)
@@ -101,7 +100,7 @@ func resourceNextDNSProfileDelete(ctx context.Context, d *schema.ResourceData, m
 
 	err := client.Profiles.Delete(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting profile"))
+		return diag.FromErr(fmt.Errorf("error deleting profile: %w", err))
 	}
 
 	return nil

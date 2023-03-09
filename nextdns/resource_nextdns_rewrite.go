@@ -2,13 +2,13 @@ package nextdns
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/amalucelli/nextdns-go/nextdns"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/pkg/errors"
 )
 
 func resourceNextDNSRewrite() *schema.Resource {
@@ -30,7 +30,7 @@ func resourceNextDNSRewriteCreate(ctx context.Context, d *schema.ResourceData, m
 
 	rewrites, err := buildRewrite(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error building rewrite list"))
+		return diag.FromErr(fmt.Errorf("error building rewrite list: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", rewrites))
 
@@ -41,7 +41,7 @@ func resourceNextDNSRewriteCreate(ctx context.Context, d *schema.ResourceData, m
 
 	existing, err := client.Rewrites.List(ctx, list)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error getting rewrites"))
+		return diag.FromErr(fmt.Errorf("error getting rewrites: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", rewrites))
 
@@ -60,7 +60,7 @@ func resourceNextDNSRewriteCreate(ctx context.Context, d *schema.ResourceData, m
 
 				err := client.Rewrites.Delete(ctx, deleteRequest)
 				if err != nil {
-					return diag.FromErr(errors.Wrap(err, "error deleting rewrite"))
+					return diag.FromErr(fmt.Errorf("error deleting rewrite: %w", err))
 				}
 
 				continue
@@ -77,7 +77,7 @@ func resourceNextDNSRewriteCreate(ctx context.Context, d *schema.ResourceData, m
 
 		_, err = client.Rewrites.Create(ctx, request)
 		if err != nil {
-			return diag.FromErr(errors.Wrap(err, "error creating rewrite"))
+			return diag.FromErr(fmt.Errorf("error creating rewrite: %w", err))
 		}
 	}
 
@@ -97,7 +97,7 @@ func resourceNextDNSRewriteRead(ctx context.Context, d *schema.ResourceData, met
 
 	rewrites, err := client.Rewrites.List(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error getting rewrites"))
+		return diag.FromErr(fmt.Errorf("error getting rewrites: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", rewrites))
 
@@ -125,7 +125,7 @@ func resourceNextDNSRewriteUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	rewrites, err := buildRewrite(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error building rewrite list"))
+		return diag.FromErr(fmt.Errorf("error building rewrite list: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", rewrites))
 
@@ -136,7 +136,7 @@ func resourceNextDNSRewriteUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	existing, err := client.Rewrites.List(ctx, list)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error getting rewrites"))
+		return diag.FromErr(fmt.Errorf("error getting rewrites: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", rewrites))
 
@@ -178,7 +178,7 @@ func resourceNextDNSRewriteUpdate(ctx context.Context, d *schema.ResourceData, m
 
 		err := client.Rewrites.Delete(ctx, deleteRequest)
 		if err != nil {
-			return diag.FromErr(errors.Wrap(err, "error deleting rewrite"))
+			return diag.FromErr(fmt.Errorf("error deleting rewrite: %w", err))
 		}
 	}
 
@@ -191,7 +191,7 @@ func resourceNextDNSRewriteUpdate(ctx context.Context, d *schema.ResourceData, m
 
 		_, err = client.Rewrites.Create(ctx, request)
 		if err != nil {
-			return diag.FromErr(errors.Wrap(err, "error creating rewrite"))
+			return diag.FromErr(fmt.Errorf("error creating rewrite: %w", err))
 		}
 	}
 
@@ -209,7 +209,7 @@ func resourceNextDNSRewriteDelete(ctx context.Context, d *schema.ResourceData, m
 
 	rewrites, err := client.Rewrites.List(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error getting rewrites"))
+		return diag.FromErr(fmt.Errorf("error getting rewrites: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", rewrites))
 
@@ -222,7 +222,7 @@ func resourceNextDNSRewriteDelete(ctx context.Context, d *schema.ResourceData, m
 
 		err = client.Rewrites.Delete(ctx, request)
 		if err != nil {
-			return diag.FromErr(errors.Wrap(err, "error deleting rewrite"))
+			return diag.FromErr(fmt.Errorf("error deleting rewrite: %w", err))
 		}
 	}
 
@@ -242,6 +242,7 @@ func resourceNextDNSRewriteImport(ctx context.Context, d *schema.ResourceData, m
 func buildRewrite(d *schema.ResourceData) ([]*nextdns.Rewrites, error) {
 	found, ok := d.GetOk("rewrite")
 	if !ok {
+		// nolint:goerr113
 		return nil, errors.New("unable to find rewrite in resource data")
 	}
 

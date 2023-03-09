@@ -2,13 +2,13 @@ package nextdns
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/amalucelli/nextdns-go/nextdns"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/pkg/errors"
 )
 
 func resourceNextDNSDenylist() *schema.Resource {
@@ -30,7 +30,7 @@ func resourceNextDNSDenylistCreate(ctx context.Context, d *schema.ResourceData, 
 
 	denylist, err := buildDenylist(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error building deny list"))
+		return diag.FromErr(fmt.Errorf("error building deny list: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", denylist))
 
@@ -42,7 +42,7 @@ func resourceNextDNSDenylistCreate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.Denylist.Create(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating deny list"))
+		return diag.FromErr(fmt.Errorf("error creating deny list: %w", err))
 	}
 
 	d.SetId(profileID)
@@ -61,7 +61,7 @@ func resourceNextDNSDenylistRead(ctx context.Context, d *schema.ResourceData, me
 
 	denylist, err := client.Denylist.List(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error getting deny list"))
+		return diag.FromErr(fmt.Errorf("error getting deny list: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", denylist))
 
@@ -89,7 +89,7 @@ func resourceNextDNSDenylistUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	denylist, err := buildDenylist(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error building deny list"))
+		return diag.FromErr(fmt.Errorf("error building deny list: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", denylist))
 
@@ -101,7 +101,7 @@ func resourceNextDNSDenylistUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.Denylist.Create(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error updating deny list"))
+		return diag.FromErr(fmt.Errorf("error updating deny list: %w", err))
 	}
 
 	return resourceNextDNSDenylistRead(ctx, d, meta)
@@ -119,7 +119,7 @@ func resourceNextDNSDenylistDelete(ctx context.Context, d *schema.ResourceData, 
 
 	err := client.Denylist.Create(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting deny list"))
+		return diag.FromErr(fmt.Errorf("error deleting deny list: %w", err))
 	}
 
 	return resourceNextDNSDenylistRead(ctx, d, meta)
@@ -138,6 +138,7 @@ func resourceNextDNSDenylistImport(ctx context.Context, d *schema.ResourceData, 
 func buildDenylist(d *schema.ResourceData) ([]*nextdns.Denylist, error) {
 	found, ok := d.GetOk("domain")
 	if !ok {
+		// nolint:goerr113
 		return nil, errors.New("unable to find domain in resource data")
 	}
 

@@ -2,13 +2,13 @@ package nextdns
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/amalucelli/nextdns-go/nextdns"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/pkg/errors"
 )
 
 func resourceNextDNSAllowlist() *schema.Resource {
@@ -30,7 +30,7 @@ func resourceNextDNSAllowlistCreate(ctx context.Context, d *schema.ResourceData,
 
 	allowlist, err := buildAllowlist(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error building allow list"))
+		return diag.FromErr(fmt.Errorf("error building allow list: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", allowlist))
 
@@ -42,7 +42,7 @@ func resourceNextDNSAllowlistCreate(ctx context.Context, d *schema.ResourceData,
 
 	err = client.Allowlist.Create(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating allow list"))
+		return diag.FromErr(fmt.Errorf("error creating allow list: %w", err))
 	}
 
 	d.SetId(profileID)
@@ -61,7 +61,7 @@ func resourceNextDNSAllowlistRead(ctx context.Context, d *schema.ResourceData, m
 
 	allowlist, err := client.Allowlist.List(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error getting allow list"))
+		return diag.FromErr(fmt.Errorf("error getting allow list: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", allowlist))
 
@@ -89,7 +89,7 @@ func resourceNextDNSAllowlistUpdate(ctx context.Context, d *schema.ResourceData,
 
 	allowlist, err := buildAllowlist(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error building allow list"))
+		return diag.FromErr(fmt.Errorf("error building allow list: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", allowlist))
 
@@ -101,7 +101,7 @@ func resourceNextDNSAllowlistUpdate(ctx context.Context, d *schema.ResourceData,
 
 	err = client.Allowlist.Create(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error updating allow list"))
+		return diag.FromErr(fmt.Errorf("error updating allow list: %w", err))
 	}
 
 	return resourceNextDNSAllowlistRead(ctx, d, meta)
@@ -119,7 +119,7 @@ func resourceNextDNSAllowlistDelete(ctx context.Context, d *schema.ResourceData,
 
 	err := client.Allowlist.Create(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting allow list"))
+		return diag.FromErr(fmt.Errorf("error deleting allow list: %w", err))
 	}
 
 	return resourceNextDNSAllowlistRead(ctx, d, meta)
@@ -138,6 +138,7 @@ func resourceNextDNSAllowlistImport(ctx context.Context, d *schema.ResourceData,
 func buildAllowlist(d *schema.ResourceData) ([]*nextdns.Allowlist, error) {
 	found, ok := d.GetOk("domain")
 	if !ok {
+		// nolint:goerr113
 		return nil, errors.New("unable to find domain in resource data")
 	}
 

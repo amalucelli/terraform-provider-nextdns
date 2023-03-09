@@ -29,3 +29,7 @@ linters-settings:
     exclude-functions:
       # tfproviderlint covers the errcheck.
       - (*github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema.ResourceData).Set
+  depguard:
+    list-type: 'denylist'
+    packages-with-error-message:
+      - 'github.com/pkg/errors': 'the github.com/pkg/errors is deprecated, use stdlib instead'
