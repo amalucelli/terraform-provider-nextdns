@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/pkg/errors"
 )
 
 func resourceNextDNSParentalControl() *schema.Resource {
@@ -30,7 +29,7 @@ func resourceNextDNSParentalControlCreate(ctx context.Context, d *schema.Resourc
 
 	parentalControl, err := buildParentalControl(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating parental control settings"))
+		return diag.FromErr(fmt.Errorf("error creating parental control settings: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", parentalControl))
 
@@ -42,7 +41,7 @@ func resourceNextDNSParentalControlCreate(ctx context.Context, d *schema.Resourc
 
 	err = client.ParentalControlServices.Create(ctx, services)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating services settings"))
+		return diag.FromErr(fmt.Errorf("error creating services settings: %w", err))
 	}
 
 	categories := &nextdns.CreateParentalControlCategoriesRequest{
@@ -53,7 +52,7 @@ func resourceNextDNSParentalControlCreate(ctx context.Context, d *schema.Resourc
 
 	err = client.ParentalControlCategories.Create(ctx, categories)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating categories settings"))
+		return diag.FromErr(fmt.Errorf("error creating categories settings: %w", err))
 	}
 
 	request := &nextdns.UpdateParentalControlRequest{
@@ -64,7 +63,7 @@ func resourceNextDNSParentalControlCreate(ctx context.Context, d *schema.Resourc
 
 	err = client.ParentalControl.Update(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating parental control settings"))
+		return diag.FromErr(fmt.Errorf("error creating parental control settings: %w", err))
 	}
 
 	d.SetId(profileID)
@@ -83,7 +82,7 @@ func resourceNextDNSParentalControlRead(ctx context.Context, d *schema.ResourceD
 
 	parentalControl, err := client.ParentalControl.Get(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error getting parental control settings"))
+		return diag.FromErr(fmt.Errorf("error getting parental control settings: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", parentalControl))
 
@@ -192,7 +191,7 @@ func resourceNextDNSParentalControlUpdate(ctx context.Context, d *schema.Resourc
 
 	parentalControl, err := buildParentalControl(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error updating parental control settings"))
+		return diag.FromErr(fmt.Errorf("error updating parental control settings: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", parentalControl))
 
@@ -204,7 +203,7 @@ func resourceNextDNSParentalControlUpdate(ctx context.Context, d *schema.Resourc
 
 	err = client.ParentalControlServices.Create(ctx, services)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error updating services settings"))
+		return diag.FromErr(fmt.Errorf("error updating services settings: %w", err))
 	}
 
 	categories := &nextdns.CreateParentalControlCategoriesRequest{
@@ -215,7 +214,7 @@ func resourceNextDNSParentalControlUpdate(ctx context.Context, d *schema.Resourc
 
 	err = client.ParentalControlCategories.Create(ctx, categories)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error updating categories settings"))
+		return diag.FromErr(fmt.Errorf("error updating categories settings: %w", err))
 	}
 
 	request := &nextdns.UpdateParentalControlRequest{
@@ -226,7 +225,7 @@ func resourceNextDNSParentalControlUpdate(ctx context.Context, d *schema.Resourc
 
 	err = client.ParentalControl.Update(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error updating parental control settings"))
+		return diag.FromErr(fmt.Errorf("error updating parental control settings: %w", err))
 	}
 
 	return resourceNextDNSParentalControlRead(ctx, d, meta)
@@ -244,7 +243,7 @@ func resourceNextDNSParentalControlDelete(ctx context.Context, d *schema.Resourc
 
 	err := client.ParentalControlServices.Create(ctx, services)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting services settings"))
+		return diag.FromErr(fmt.Errorf("error deleting services settings: %w", err))
 	}
 
 	categories := &nextdns.CreateParentalControlCategoriesRequest{
@@ -255,7 +254,7 @@ func resourceNextDNSParentalControlDelete(ctx context.Context, d *schema.Resourc
 
 	err = client.ParentalControlCategories.Create(ctx, categories)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting categories settings"))
+		return diag.FromErr(fmt.Errorf("error deleting categories settings: %w", err))
 	}
 
 	parentalControl := &nextdns.UpdateParentalControlRequest{
@@ -266,7 +265,7 @@ func resourceNextDNSParentalControlDelete(ctx context.Context, d *schema.Resourc
 
 	err = client.ParentalControl.Update(ctx, parentalControl)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting parental control settings"))
+		return diag.FromErr(fmt.Errorf("error deleting parental control settings: %w", err))
 	}
 
 	return resourceNextDNSParentalControlRead(ctx, d, meta)

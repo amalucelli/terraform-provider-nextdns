@@ -9,7 +9,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/pkg/errors"
 )
 
 func resourceNextDNSSettings() *schema.Resource {
@@ -31,7 +30,7 @@ func resourceNextDNSSettingsCreate(ctx context.Context, d *schema.ResourceData, 
 
 	settings, err := buildSettings(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating settings"))
+		return diag.FromErr(fmt.Errorf("error creating settings: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", settings))
 
@@ -43,7 +42,7 @@ func resourceNextDNSSettingsCreate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.SettingsLogs.Update(ctx, logs)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating logs settings"))
+		return diag.FromErr(fmt.Errorf("error creating logs settings: %w", err))
 	}
 
 	blockPage := &nextdns.UpdateSettingsBlockPageRequest{
@@ -54,7 +53,7 @@ func resourceNextDNSSettingsCreate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.SettingsBlockPage.Update(ctx, blockPage)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating categories settings"))
+		return diag.FromErr(fmt.Errorf("error creating categories settings: %w", err))
 	}
 
 	performance := &nextdns.UpdateSettingsPerformanceRequest{
@@ -65,7 +64,7 @@ func resourceNextDNSSettingsCreate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.SettingsPerformance.Update(ctx, performance)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating categories settings"))
+		return diag.FromErr(fmt.Errorf("error creating categories settings: %w", err))
 	}
 
 	request := &nextdns.UpdateSettingsRequest{
@@ -76,7 +75,7 @@ func resourceNextDNSSettingsCreate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.Settings.Update(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating parental control settings"))
+		return diag.FromErr(fmt.Errorf("error creating parental control settings: %w", err))
 	}
 
 	d.SetId(profileID)
@@ -95,7 +94,7 @@ func resourceNextDNSSettingsRead(ctx context.Context, d *schema.ResourceData, me
 
 	settings, err := client.Settings.Get(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error getting settings"))
+		return diag.FromErr(fmt.Errorf("error getting settings: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", settings))
 
@@ -137,7 +136,7 @@ func resourceNextDNSSettingsUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	settings, err := buildSettings(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating settings"))
+		return diag.FromErr(fmt.Errorf("error creating settings: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", settings))
 
@@ -149,7 +148,7 @@ func resourceNextDNSSettingsUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.SettingsLogs.Update(ctx, logs)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating logs settings"))
+		return diag.FromErr(fmt.Errorf("error creating logs settings: %w", err))
 	}
 
 	blockPage := &nextdns.UpdateSettingsBlockPageRequest{
@@ -160,7 +159,7 @@ func resourceNextDNSSettingsUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.SettingsBlockPage.Update(ctx, blockPage)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating categories settings"))
+		return diag.FromErr(fmt.Errorf("error creating categories settings: %w", err))
 	}
 
 	performance := &nextdns.UpdateSettingsPerformanceRequest{
@@ -171,7 +170,7 @@ func resourceNextDNSSettingsUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.SettingsPerformance.Update(ctx, performance)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating categories settings"))
+		return diag.FromErr(fmt.Errorf("error creating categories settings: %w", err))
 	}
 
 	request := &nextdns.UpdateSettingsRequest{
@@ -182,7 +181,7 @@ func resourceNextDNSSettingsUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.Settings.Update(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating parental control settings"))
+		return diag.FromErr(fmt.Errorf("error creating parental control settings: %w", err))
 	}
 
 	return resourceNextDNSSettingsRead(ctx, d, meta)
@@ -200,7 +199,7 @@ func resourceNextDNSSettingsDelete(ctx context.Context, d *schema.ResourceData, 
 
 	err := client.SettingsLogs.Update(ctx, logs)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting logs settings"))
+		return diag.FromErr(fmt.Errorf("error deleting logs settings: %w", err))
 	}
 
 	blockPage := &nextdns.UpdateSettingsBlockPageRequest{
@@ -211,7 +210,7 @@ func resourceNextDNSSettingsDelete(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.SettingsBlockPage.Update(ctx, blockPage)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting block page settings"))
+		return diag.FromErr(fmt.Errorf("error deleting block page settings: %w", err))
 	}
 
 	performance := &nextdns.UpdateSettingsPerformanceRequest{
@@ -222,7 +221,7 @@ func resourceNextDNSSettingsDelete(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.SettingsPerformance.Update(ctx, performance)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting performance settings"))
+		return diag.FromErr(fmt.Errorf("error deleting performance settings: %w", err))
 	}
 
 	settings := &nextdns.UpdateSettingsRequest{
@@ -233,7 +232,7 @@ func resourceNextDNSSettingsDelete(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.Settings.Update(ctx, settings)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting settings"))
+		return diag.FromErr(fmt.Errorf("error deleting settings: %w", err))
 	}
 
 	return resourceNextDNSSettingsRead(ctx, d, meta)

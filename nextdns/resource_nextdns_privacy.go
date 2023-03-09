@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/pkg/errors"
 )
 
 func resourceNextDNSPrivacy() *schema.Resource {
@@ -30,7 +29,7 @@ func resourceNextDNSPrivacyCreate(ctx context.Context, d *schema.ResourceData, m
 
 	privacy, err := buildPrivacy(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating privacy settings"))
+		return diag.FromErr(fmt.Errorf("error creating privacy settings: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", privacy))
 
@@ -42,7 +41,7 @@ func resourceNextDNSPrivacyCreate(ctx context.Context, d *schema.ResourceData, m
 
 	err = client.PrivacyBlocklists.Create(ctx, blocklist)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating blocklist settings"))
+		return diag.FromErr(fmt.Errorf("error creating blocklist settings: %w", err))
 	}
 
 	natives := &nextdns.CreatePrivacyNativesRequest{
@@ -53,7 +52,7 @@ func resourceNextDNSPrivacyCreate(ctx context.Context, d *schema.ResourceData, m
 
 	err = client.PrivacyNatives.Create(ctx, natives)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating native settings"))
+		return diag.FromErr(fmt.Errorf("error creating native settings: %w", err))
 	}
 
 	request := &nextdns.UpdatePrivacyRequest{
@@ -64,7 +63,7 @@ func resourceNextDNSPrivacyCreate(ctx context.Context, d *schema.ResourceData, m
 
 	err = client.Privacy.Update(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating privacy settings"))
+		return diag.FromErr(fmt.Errorf("error creating privacy settings: %w", err))
 	}
 	d.SetId(profileID)
 
@@ -80,7 +79,7 @@ func resourceNextDNSPrivacyRead(ctx context.Context, d *schema.ResourceData, met
 	}
 	privacy, err := client.Privacy.Get(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error getting privacy settings"))
+		return diag.FromErr(fmt.Errorf("error getting privacy settings: %w", err))
 	}
 
 	d.SetId(profileID)
@@ -99,7 +98,7 @@ func resourceNextDNSPrivacyUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	privacy, err := buildPrivacy(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error updating privacy settings"))
+		return diag.FromErr(fmt.Errorf("error updating privacy settings: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", privacy))
 
@@ -111,7 +110,7 @@ func resourceNextDNSPrivacyUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	err = client.PrivacyBlocklists.Create(ctx, blocklist)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting blocklist settings"))
+		return diag.FromErr(fmt.Errorf("error deleting blocklist settings: %w", err))
 	}
 
 	natives := &nextdns.CreatePrivacyNativesRequest{
@@ -122,7 +121,7 @@ func resourceNextDNSPrivacyUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	err = client.PrivacyNatives.Create(ctx, natives)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting native settings"))
+		return diag.FromErr(fmt.Errorf("error deleting native settings: %w", err))
 	}
 
 	request := &nextdns.UpdatePrivacyRequest{
@@ -133,7 +132,7 @@ func resourceNextDNSPrivacyUpdate(ctx context.Context, d *schema.ResourceData, m
 
 	err = client.Privacy.Update(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting privacy settings"))
+		return diag.FromErr(fmt.Errorf("error deleting privacy settings: %w", err))
 	}
 
 	return resourceNextDNSPrivacyRead(ctx, d, meta)
@@ -151,7 +150,7 @@ func resourceNextDNSPrivacyDelete(ctx context.Context, d *schema.ResourceData, m
 
 	err := client.PrivacyBlocklists.Create(ctx, blocklist)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting blocklist settings"))
+		return diag.FromErr(fmt.Errorf("error deleting blocklist settings: %w", err))
 	}
 
 	natives := &nextdns.CreatePrivacyNativesRequest{
@@ -162,7 +161,7 @@ func resourceNextDNSPrivacyDelete(ctx context.Context, d *schema.ResourceData, m
 
 	err = client.PrivacyNatives.Create(ctx, natives)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting native settings"))
+		return diag.FromErr(fmt.Errorf("error deleting native settings: %w", err))
 	}
 
 	privacy := &nextdns.UpdatePrivacyRequest{
@@ -173,7 +172,7 @@ func resourceNextDNSPrivacyDelete(ctx context.Context, d *schema.ResourceData, m
 
 	err = client.Privacy.Update(ctx, privacy)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting privacy settings"))
+		return diag.FromErr(fmt.Errorf("error deleting privacy settings: %w", err))
 	}
 
 	return resourceNextDNSPrivacyRead(ctx, d, meta)
