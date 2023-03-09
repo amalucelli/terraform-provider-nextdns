@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/pkg/errors"
 )
 
 func resourceNextDNSSecurity() *schema.Resource {
@@ -30,7 +29,7 @@ func resourceNextDNSSecurityCreate(ctx context.Context, d *schema.ResourceData, 
 
 	sec, err := buildSecurity(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating security settings"))
+		return diag.FromErr(fmt.Errorf("error creating security settings: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", sec))
 
@@ -42,7 +41,7 @@ func resourceNextDNSSecurityCreate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.SecurityTlds.Create(ctx, tlds)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating security tlds settings"))
+		return diag.FromErr(fmt.Errorf("error creating security tlds settings: %w", err))
 	}
 
 	request := &nextdns.UpdateSecurityRequest{
@@ -53,7 +52,7 @@ func resourceNextDNSSecurityCreate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.Security.Update(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error creating security settings"))
+		return diag.FromErr(fmt.Errorf("error creating security settings: %w", err))
 	}
 
 	d.SetId(profileID)
@@ -70,7 +69,7 @@ func resourceNextDNSSecurityRead(ctx context.Context, d *schema.ResourceData, me
 	}
 	security, err := client.Security.Get(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error getting security settings"))
+		return diag.FromErr(fmt.Errorf("error getting security settings: %w", err))
 	}
 
 	d.SetId(profileID)
@@ -98,7 +97,7 @@ func resourceNextDNSSecurityUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	sec, err := buildSecurity(d)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error updating security settings"))
+		return diag.FromErr(fmt.Errorf("error updating security settings: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", sec))
 
@@ -110,7 +109,7 @@ func resourceNextDNSSecurityUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.SecurityTlds.Create(ctx, tlds)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error updating security tlds settings"))
+		return diag.FromErr(fmt.Errorf("error updating security tlds settings: %w", err))
 	}
 
 	request := &nextdns.UpdateSecurityRequest{
@@ -121,7 +120,7 @@ func resourceNextDNSSecurityUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.Security.Update(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error updating security settings"))
+		return diag.FromErr(fmt.Errorf("error updating security settings: %w", err))
 	}
 
 	return resourceNextDNSSecurityRead(ctx, d, meta)
@@ -139,7 +138,7 @@ func resourceNextDNSSecurityDelete(ctx context.Context, d *schema.ResourceData, 
 
 	err := client.SecurityTlds.Create(ctx, tlds)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting security tlds settings"))
+		return diag.FromErr(fmt.Errorf("error deleting security tlds settings: %w", err))
 	}
 
 	sec := &nextdns.UpdateSecurityRequest{
@@ -150,7 +149,7 @@ func resourceNextDNSSecurityDelete(ctx context.Context, d *schema.ResourceData, 
 
 	err = client.Security.Update(ctx, sec)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error deleting security settings"))
+		return diag.FromErr(fmt.Errorf("error deleting security settings: %w", err))
 	}
 
 	return resourceNextDNSSecurityRead(ctx, d, meta)
