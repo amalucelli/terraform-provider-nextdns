@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/pkg/errors"
 )
 
 func dataSourceNextDNSSetupLinkedIP() *schema.Resource {
@@ -58,7 +57,7 @@ func dataSourceNextDNSSetupLinkedIPRead(ctx context.Context, d *schema.ResourceD
 
 	setup, err := client.SetupLinkedIP.Get(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error getting setup linkedip settings"))
+		return diag.FromErr(fmt.Errorf("error getting setup linkedip settings: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", setup))
 

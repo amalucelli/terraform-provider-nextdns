@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/pkg/errors"
 )
 
 func dataSourceNextDNSSetupEndpoint() *schema.Resource {
@@ -66,7 +65,7 @@ func dataSourceNextDNSSetupEndpointRead(ctx context.Context, d *schema.ResourceD
 
 	setup, err := client.Setup.Get(ctx, request)
 	if err != nil {
-		return diag.FromErr(errors.Wrap(err, "error getting setup endpoint settings"))
+		return diag.FromErr(fmt.Errorf("error getting setup endpoint settings: %w", err))
 	}
 	tflog.Debug(ctx, fmt.Sprintf("object built: %+v", setup))
 
