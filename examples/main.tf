@@ -182,6 +182,14 @@ resource "nextdns_rewrite" "this" {
   }
 }
 
+data "nextdns_setup_endpoint" "this" {
+  profile_id = nextdns_profile.this.id
+}
+
+data "nextdns_setup_linkedip" "this" {
+  profile_id = nextdns_profile.this.id
+}
+
 terraform {
   required_providers {
     nextdns = {
@@ -189,4 +197,24 @@ terraform {
       version = "0.1.0"
     }
   }
+}
+
+output "doh" {
+  description = "The DNS over HTTPS address the profile is reachable at"
+  value = data.nextdns_setup_endpoint.this.dot
+}
+
+output "dot" {
+  description = "The DNS over TLS address the profile is reachable at"
+  value = data.nextdns_setup_endpoint.this.doh
+}
+
+output "ipv6" {
+  description = "The IPv6 address the profile is reachable at"
+  value = data.nextdns_setup_endpoint.this.ipv6
+}
+
+output "servers" {
+  description = "The DNS servers available for the profile"
+  value = data.nextdns_setup_linkedip.this.servers
 }

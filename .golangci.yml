@@ -4,6 +4,7 @@ run:
 
 linters:
   enable:
+  - depguard
   - errname
   - errorlint
   - errcheck

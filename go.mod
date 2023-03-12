@@ -3,7 +3,7 @@ module github.com/amalucelli/terraform-provider-nextdns
 go 1.19
 
 require (
-	github.com/amalucelli/nextdns-go v0.4.0
+	github.com/amalucelli/nextdns-go v0.5.0
 	github.com/hashicorp/terraform-plugin-log v0.8.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.25.0
 )

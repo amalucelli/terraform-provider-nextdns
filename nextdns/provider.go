@@ -17,6 +17,10 @@ func Provider() *schema.Provider {
 				Description: "NextDNS API Key",
 			},
 		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"nextdns_setup_endpoint": dataSourceNextDNSSetupEndpoint(),
+			"nextdns_setup_linkedip": dataSourceNextDNSSetupLinkedIP(),
+		},
 		ResourcesMap: map[string]*schema.Resource{
 			"nextdns_allowlist":        resourceNextDNSAllowlist(),
 			"nextdns_denylist":         resourceNextDNSDenylist(),
