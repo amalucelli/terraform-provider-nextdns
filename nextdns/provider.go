@@ -35,6 +35,7 @@ func Provider() *schema.Provider {
 	}
 }
 
+// nolint:revive
 func configure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	client, err := nextdns.New(
 		nextdns.WithAPIKey(d.Get("api_key").(string)))
