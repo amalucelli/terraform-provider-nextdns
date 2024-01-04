@@ -193,7 +193,7 @@ data "nextdns_setup_linkedip" "this" {
 terraform {
   required_providers {
     nextdns = {
-      source  = "github.com/amalucelli/nextdns"
+      source  = "amalucelli/nextdns"
       version = "0.1.0"
     }
   }
