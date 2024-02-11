@@ -2,6 +2,7 @@ package nextdns
 
 import (
 	"context"
+	"os"
 
 	"github.com/amalucelli/nextdns-go/nextdns"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -13,7 +14,7 @@ func Provider() *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"api_key": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "NextDNS API Key",
 			},
 		},
@@ -37,8 +38,19 @@ func Provider() *schema.Provider {
 
 // nolint:revive
 func configure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	client, err := nextdns.New(
-		nextdns.WithAPIKey(d.Get("api_key").(string)))
+	apiKey := os.Getenv("NEXTDNS_API_KEY")
+
+	if key, ok := d.Get("api_key").(string); ok && len(key) > 0 {
+		apiKey = key
+	}
+
+	if len(apiKey) == 0 {
+		return nil, diag.Errorf(
+			"NextDNS API key must be provided in the provider block or NEXTDNS_API_KEY environment variable.",
+		)
+	}
+
+	client, err := nextdns.New(nextdns.WithAPIKey(apiKey))
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
